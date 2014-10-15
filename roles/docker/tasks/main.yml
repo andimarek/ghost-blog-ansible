@@ -1,0 +1,33 @@
+---
+- name: Add the docker gpg key
+  apt_key: url="https://get.docker.io/gpg" id="A88D21E9"
+
+- name: Add the Docker repository
+  apt_repository:
+    repo: 'deb http://get.docker.io/ubuntu docker main'
+    update_cache: yes
+
+- name: Install Docker (lxc-docker)
+  apt: pkg=lxc-docker
+
+- name: Copy docker default config
+  copy: src=docker_config dest=/etc/default/docker
+
+- name: Change the ufw default forward policy from drop to accept
+  lineinfile: dest=/etc/default/ufw regexp="^DEFAULT_FORWARD_POLICY=" line="DEFAULT_FORWARD_POLICY=\"ACCEPT\""
+
+- name: Enable ipv6 forwarding
+  lineinfile: dest=/etc/sysctl.conf regexp="^#net.ipv6.conf.all.forwarding=1" line="net.ipv6.conf.all.forwarding=1"
+
+- name: reload sysctl config
+  shell: sysctl -p
+
+- name: Install pip for python
+  apt: name=python-pip
+
+- name: Install docker pyhton module for ansible
+  pip: name=docker-py
+
+- name: Ensure docker is running
+  service: name=docker state=running
+

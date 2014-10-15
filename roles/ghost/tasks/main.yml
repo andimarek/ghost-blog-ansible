@@ -1,0 +1,28 @@
+---
+- name: Pull ghost
+  shell: docker pull dockerfile/ghost
+
+- name: Ensure ghost ghost content directories exist
+  file: path={{ item }} state=directory
+  with_items:
+    - /opt/ghost/content/data/
+    - /opt/ghost/content/images/
+    - /opt/ghost/content/themes/
+
+- name: Copy ghost config file
+  copy: src=config.js dest=/opt/ghost/config.js
+
+- name: Copy ghost themes
+  copy: src=themes/ dest=/opt/ghost/content/themes
+
+- name: Stop ghost
+  shell: docker stop ghost
+  ignore_errors: True
+
+- name: remove ghost
+  shell: docker rm ghost
+  ignore_errors: True
+
+- name: Start Ghost container
+  docker: image=dockerfile/ghost expose=2368 ports=8080:2368 volumes=/opt/ghost:/ghost-override name=ghost
+

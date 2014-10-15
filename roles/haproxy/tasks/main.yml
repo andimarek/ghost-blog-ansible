@@ -1,0 +1,23 @@
+---
+- name: Install haproxy docker
+  shell: docker pull dockerfile/haproxy
+
+- name: Create /opt/haproxy directory
+  file: path=/opt/haproxy state=directory
+
+- name: Copy haproxy config file
+  copy: src=haproxy.cfg dest=/opt/haproxy/haproxy.cfg
+
+- name: Copy ssl pem file
+  copy: src=example.com.pem dest=/opt/haproxy
+
+- name: Stop haproxy
+  shell: docker stop haproxy
+  ignore_errors: True
+
+- name: remove haproxy
+  shell: docker rm haproxy
+  ignore_errors: True
+
+- name: Start haproxy
+  docker: image=dockerfile/haproxy ports="80:80,8090:8090,443:443" expose=8090  links=ghost:ghost volumes=/opt/haproxy:/haproxy-override name=haproxy

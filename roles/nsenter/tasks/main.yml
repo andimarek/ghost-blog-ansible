@@ -1,0 +1,7 @@
+---
+- stat: path=/usr/local/bin/docker-enter
+  register: docker_enter
+
+- name: Install nsenter
+  shell: docker run --rm -v /usr/local/bin:/target jpetazzo/nsenter
+  when: not docker_enter.stat.exists
